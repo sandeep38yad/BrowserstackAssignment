@@ -1,6 +1,8 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.remote.remote_connection import RemoteConnection
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
+from selenium.webdriver.safari.options import Options as SafariOptions
 import requests
 import time
 from googletrans import Translator
@@ -117,6 +119,105 @@ def analyze_titles(articles):
    return count_dict
 
 
+
+def run_on_browserstack(capabilities):
+    print(f"\n[INFO] Running on BrowserStack with capabilities: {capabilities}")
+    url = f'https://{BROWSERSTACK_USERNAME}:{BROWSERSTACK_ACCESS_KEY}@hub-cloud.browserstack.com/wd/hub'
+    driver = None
+    test_passed = False
+
+    try:
+        print(f"[INFO] Connecting to BrowserStack at {url}")
+
+        if 'browser' in capabilities:
+            if capabilities['browser'] == 'Chrome':
+                options = webdriver.ChromeOptions()
+            elif capabilities['browser'] == 'Firefox':
+                options = webdriver.FirefoxOptions()
+            elif capabilities['browser'] == 'Safari':
+                options = webdriver.SafariOptions()
+            else:
+                options = webdriver.ChromeOptions()
+        else:
+            options = webdriver.ChromeOptions()
+
+        for key, value in capabilities.items():
+            options.set_capability(key, value)
+
+        options.set_capability('name',
+                               f"El País Article Test - {capabilities.get('browser', capabilities.get('device', 'Unknown'))}")
+        options.set_capability('build', 'Article Analysis 1.0')
+
+        driver = webdriver.Remote(
+            command_executor=url,
+            options=options
+        )
+
+        print(f"[INFO] Successfully connected to BrowserStack with session ID: {driver.session_id}")
+
+        articles = scrape_opinion_articles(driver)
+        if not articles:
+            print("[ERROR] No articles were scraped")
+            return
+
+        translated_titles = translate_titles(articles)
+        if not translated_titles:
+            print("[ERROR] No translations were generated")
+            return
+
+        for i, article in enumerate(articles):
+            if i < len(translated_titles):
+                print(f"Title (ES): {article['title']}")
+                print(f"Title (EN): {translated_titles[i]}")
+
+        repeated = analyze_titles(translated_titles)
+        print("Repeated Words:", repeated)
+
+        test_passed = True
+
+    except Exception as e:
+        print(f"[ERROR] Failed during BrowserStack session: {e}")
+        test_passed = False
+    finally:
+        if driver:
+            try:
+                if test_passed:
+                    print("[INFO] Marking test as PASSED")
+                    driver.execute_script(
+                        'browserstack_executor: {"action": "setSessionStatus", "arguments": {"status":"passed", "reason": "All tasks completed successfully!"}}')
+                else:
+                    print("[INFO] Marking test as FAILED")
+                    driver.execute_script(
+                        'browserstack_executor: {"action": "setSessionStatus", "arguments": {"status":"failed", "reason": "Test encountered errors during execution"}}')
+            except Exception as e:
+                print(f"[WARNING] Could not set test status: {e}")
+
+            driver.quit()
+            print("[INFO] BrowserStack session closed")
+
+
+def run_parallel_tests():
+    capabilities_list = [
+        {'browser': 'Chrome', 'browser_version': 'latest', 'os': 'Windows', 'os_version': '11'},
+        {'browser': 'Firefox', 'browser_version': 'latest', 'os': 'Windows', 'os_version': '10'},
+        {'browser': 'Safari', 'browser_version': 'latest', 'os': 'OS X', 'os_version': 'Monterey'},
+        {'device': 'Samsung Galaxy S22', 'realMobile': 'true', 'os_version': '12.0'},
+        {'device': 'iPhone 14', 'realMobile': 'true', 'os_version': '16'}
+    ]
+
+    print("[INFO] Starting parallel tests on BrowserStack...")
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        futures = [executor.submit(run_on_browserstack, capability) for capability in capabilities_list]
+
+        for future in futures:
+            try:
+                future.result()
+            except Exception as e:
+                print(f"[ERROR] Test execution failed: {e}")
+
+    print("[INFO] All BrowserStack tests completed")
+
+
 def run_locally():
    print("[INFO] Running tests locally using ChromeDriver...")
    driver = webdriver.Chrome()
@@ -133,7 +234,7 @@ def run_locally():
 if __name__ == "__main__":
 
    run_locally()
-
+   # run_parallel_tests()
 
 
 
