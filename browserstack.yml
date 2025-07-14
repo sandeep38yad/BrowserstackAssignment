@@ -1,25 +1,33 @@
-auth:
-  username: sandeepyadav_O6Fb38
-  access_key: ygmm2qwn8tkDUYMsC5yp
-
-run_settings:
-  test_suite: test_opinion_articles.py
-  parallel_runs: 5
-  framework: pytest
-
-browsers:
-  - browser: chrome
-    os: Windows
-    os_version: 11
-  - browser: firefox
-    os: Windows
-    os_version: 10
-  - browser: safari
-    os: OS X
-    os_version: Monterey
-  - device: Samsung Galaxy S22
-    os_version: 12.0
-    real_mobile: true
-  - device: iPhone 14
-    os_version: 16
-    real_mobile: true
+userName: sandeepyadav_O6Fb38
+accessKey: ygmm2qwn8tkDUYMsC5yp
+platforms:
+  - os: Windows
+    osVersion: 11
+    browserName: Chrome
+    browserVersion: latest
+  - os: Windows
+    osVersion: 10
+    browserName: Firefox
+    browserVersion: latest
+  - os: OS X
+    osVersion: Monterey
+    browserName: Safari
+    browserVersion: latest
+  - deviceName: Samsung Galaxy S22
+    osVersion: 12.0
+    browserName: chrome
+    deviceOrientation: portrait
+    realMobile: true
+  - deviceName: iPhone 14
+    osVersion: 16
+    browserName: safari
+    deviceOrientation: portrait
+    realMobile: true
+browserstackLocal: true
+buildName: El Pais Opinion Articles Test
+projectName: Web Scraping Project
+parallels: 5
+framework: pytest
+debug: true
+networkLogs: true
+consoleLogs: info

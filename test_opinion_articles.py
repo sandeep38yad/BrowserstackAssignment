@@ -19,9 +19,11 @@ def driver(request):
         capabilities = json.loads(os.environ['BROWSERSTACK_CAPABILITIES'])
         print(f"[DEBUG] Using BrowserStack capabilities: {capabilities}")
         url = f'https://{BROWSERSTACK_USERNAME}:{BROWSERSTACK_ACCESS_KEY}@hub-cloud.browserstack.com/wd/hub'
+        options = webdriver.ChromeOptions()
+        options.set_capability('bstack:options', capabilities)
         driver = webdriver.Remote(
-            command_executor=RemoteConnection(url, resolve_ip=False),
-            desired_capabilities=capabilities
+            command_executor=RemoteConnection(url, resolve_ip = False),
+            options=options
         )
     else:
         print("[DEBUG] Using local Chrome WebDriver")
@@ -111,14 +113,38 @@ def analyze_titles(articles):
     print(f"[DEBUG] Word count: {count_dict}")
     return count_dict
 
+# def test_opinion_articles_workflow(driver):
+#     print("[DEBUG] Starting test_opinion_articles_workflow")
+#     articles = scrape_opinion_articles(driver)
+#     print(f"[DEBUG] Articles scraped: {articles}")
+#     assert len(articles) > 0, "No articles scraped"
+#     translated = translate_titles(articles)
+#     print(f"[DEBUG] Translated titles: {translated}")
+#     assert all(isinstance(t, str) for t in translated), "Translation failed"
+#     repeated = analyze_titles(translated)
+#     print(f"[DEBUG] Title analysis: {repeated}")
+#     assert isinstance(repeated, dict)
+
+
 def test_opinion_articles_workflow(driver):
     print("[DEBUG] Starting test_opinion_articles_workflow")
-    articles = scrape_opinion_articles(driver)
-    print(f"[DEBUG] Articles scraped: {articles}")
-    assert len(articles) > 0, "No articles scraped"
-    translated = translate_titles(articles)
-    print(f"[DEBUG] Translated titles: {translated}")
-    assert all(isinstance(t, str) for t in translated), "Translation failed"
-    repeated = analyze_titles(translated)
-    print(f"[DEBUG] Title analysis: {repeated}")
-    assert isinstance(repeated, dict)
+    try:
+        articles = scrape_opinion_articles(driver)
+        print(f"[DEBUG] Articles scraped: {articles}")
+        assert len(articles) > 0, "No articles scraped"
+
+        translated = translate_titles(articles)
+        print(f"[DEBUG] Translated titles: {translated}")
+        assert all(isinstance(t, str) for t in translated), "Translation failed"
+
+        repeated = analyze_titles(translated)
+        print(f"[DEBUG] Title analysis: {repeated}")
+        assert isinstance(repeated, dict), "Analysis failed to produce dictionary"
+
+        driver.execute_script(
+            'browserstack_executor: {"action": "setSessionStatus", "arguments": {"status":"passed", "reason": "All assertions passed"}}')
+
+    except Exception as e:
+        driver.execute_script(
+            f'browserstack_executor: {"action": "setSessionStatus", "arguments": {"status":"failed", "reason": "Test failed"}}')
+        raise
