@@ -1,0 +1,25 @@
+auth:
+  username: sandeepyadav_O6Fb38
+  access_key: ygmm2qwn8tkDUYMsC5yp
+
+run_settings:
+  test_suite: test_opinion_articles.py
+  parallel_runs: 5
+  framework: pytest
+
+browsers:
+  - browser: chrome
+    os: Windows
+    os_version: 11
+  - browser: firefox
+    os: Windows
+    os_version: 10
+  - browser: safari
+    os: OS X
+    os_version: Monterey
+  - device: Samsung Galaxy S22
+    os_version: 12.0
+    real_mobile: true
+  - device: iPhone 14
+    os_version: 16
+    real_mobile: true
