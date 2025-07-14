@@ -9,9 +9,9 @@ from collections import Counter
 import re
 from concurrent.futures import ThreadPoolExecutor
 
-
-BROWSERSTACK_USERNAME = 'your_username'
-BROWSERSTACK_ACCESS_KEY = 'your_access_key'
+#
+# BROWSERSTACK_USERNAME = 'your_username'
+# BROWSERSTACK_ACCESS_KEY = 'your_access_key'
 
 
 def scrape_opinion_articles(driver):
@@ -132,23 +132,23 @@ def analyze_titles(articles):
 
 
 
-def run_on_browserstack(capabilities):
-   print(f"\n[INFO] Running on BrowserStack with capabilities: {capabilities}")
-   url = f'https://{BROWSERSTACK_USERNAME}:{BROWSERSTACK_ACCESS_KEY}@hub-cloud.browserstack.com/wd/hub'
-   driver = webdriver.Remote(
-       command_executor=RemoteConnection(url, resolve_ip=False),
-       desired_capabilities=capabilities
-   )
-   try:
-       articles = scrape_opinion_articles(driver)
-       articles = translate_titles(articles)
-       for art in articles:
-           print(f"Title (EN): {art}")
-       repeated = analyze_titles(articles)
-       print("Repeated Words:", repeated)
-   finally:
-       driver.quit()
-       print("[INFO] BrowserStack session closed.")
+# def run_on_browserstack(capabilities):
+#    print(f"\n[INFO] Running on BrowserStack with capabilities: {capabilities}")
+#    url = f'https://{BROWSERSTACK_USERNAME}:{BROWSERSTACK_ACCESS_KEY}@hub-cloud.browserstack.com/wd/hub'
+#    driver = webdriver.Remote(
+#        command_executor=RemoteConnection(url, resolve_ip=False),
+#        desired_capabilities=capabilities
+#    )
+#    try:
+#        articles = scrape_opinion_articles(driver)
+#        articles = translate_titles(articles)
+#        for art in articles:
+#            print(f"Title (EN): {art}")
+#        repeated = analyze_titles(articles)
+#        print("Repeated Words:", repeated)
+#    finally:
+#        driver.quit()
+#        print("[INFO] BrowserStack session closed.")
 
 
 
