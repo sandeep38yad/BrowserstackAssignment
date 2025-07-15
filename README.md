@@ -13,3 +13,6 @@ pip install -r requirements.txt
 
 ### 3. Run the Application
 python main.py
+
+### 3. Automation running locally:
+DriveLink: https://drive.google.com/file/d/1HXuSa1215OuCS8gCr6fdwQFD0B9ceKaT/view?usp=sharing
